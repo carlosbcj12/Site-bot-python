@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Auto-Refresh Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css">
+    <style>
+        .progress-bar {
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            transition: width 0.5s ease;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-blue-600 p-6">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-white text-3xl mr-4"></i>
+                    <h1 class="text-2xl font-bold text-white">Website Auto-Refresh Bot</h1>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <label for="websiteUrl" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-globe mr-2 text-blue-500"></i> Website URL
+                    </label>
+                    <input type="url" id="websiteUrl" placeholder="https://example.com" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-clock mr-2 text-blue-500"></i> Refresh Interval (minutes)
+                    </label>
+                    <input type="number" id="duration" value="1" min="1" 
+                           class="w-20 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="flex items-center mb-6">
+                    <input type="checkbox" id="headless" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="headless" class="ml-2 block text-sm text-gray-700">
+                        Run in background (headless mode)
+                    </label>
+                </div>
+                
+                <div class="mb-6 hidden" id="statusContainer">
+                    <div class="flex items-center mb-2">
+                        <span id="statusIcon" class="text-xl mr-2"><i class="fas fa-circle-notch fa-spin text-blue-500"></i></span>
+                        <span id="statusText" class="font-medium">Initializing bot...</span>
+                    </div>
+                    <div class="progress-bar mt-2">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-600" id="timeRemaining">Time until next refresh: 1:00</div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button id="startBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <i class="fas fa-play mr-2"></i> Start Bot
+                    </button>
+                    <button id="stopBtn" class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hidden">
+                        <i class="fas fa-stop mr-2"></i> Stop Bot
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gray-800 p-4">
+                <h2 class="text-lg font-semibold text-white">
+                    <i class="fas fa-code mr-2"></i> Python Bot Code
+                </h2>
+            </div>
+            <div class="p-4 bg-gray-900 text-gray-100 overflow-x-auto">
+                <pre id="pythonCode" class="text-sm">
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+
+def run_bot(url, interval_minutes, headless=False):
+    options = Options()
+    if headless:
+        options.add_argument("--headless")
+    
+    driver = webdriver.Chrome(options=options)
+    driver.get(url)
+    
+    try:
+        while True:
+            print(f"Waiting for {interval_minutes} minute(s)...")
+            time.sleep(interval_minutes * 60)
+            print("Refreshing page...")
+            driver.refresh()
+    except KeyboardInterrupt:
+        print("Stopping bot...")
+    finally:
+        driver.quit()
+
+if __name__ == "__main__":
+    website_url = "https://example.com"  # Change this to your target URL
+    refresh_interval = 1  # minutes
+    run_bot(website_url, refresh_interval, headless=False)
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <py-script>
+import asyncio
+from js import document, console
+
+def update_status(text, icon_class=None, color="blue"):
+    status_text = document.getElementById("statusText")
+    status_icon = document.getElementById("statusIcon")
+    
+    status_text.textContent = text
+    status_icon.innerHTML = f'&lt;i class="fas {icon_class} text-{color}-500"&gt;&lt;/i&gt;'
+    
+    if "fa-spin" in icon_class:
+        status_icon.classList.add("animate-spin")
+    else:
+        status_icon.classList.remove("animate-spin")
+
+async def run_bot():
+    url = document.getElementById("websiteUrl").value
+    duration = int(document.getElementById("duration").value)
+    headless = document.getElementById("headless").checked
+    
+    if not url:
+        update_status("Please enter a valid URL", "fa-exclamation-circle", "red")
+        return
+    
+    update_status("Starting browser...", "fa-chrome fa-spin")
+    
+    # This is just a simulation since PyScript can't run Selenium directly
+    # In a real implementation, you would need to run this on a server
+    
+    document.getElementById("startBtn").classList.add("hidden")
+    document.getElementById("stopBtn").classList.remove("hidden")
+    document.getElementById("statusContainer").classList.remove("hidden")
+    
+    total_seconds = duration * 60
+    elapsed = 0
+    
+    while True:
+        if elapsed >= total_seconds:
+            update_status("Refreshing page...", "fa-sync-alt fa-spin", "blue")
+            await asyncio.sleep(2)
+            elapsed = 0
+            update_status("Page refreshed, waiting...", "fa-check-circle", "green")
+        else:
+            progress = (elapsed / total_seconds) * 100
+            document.getElementById("progressFill").style.width = f"{progress}%"
+            
+            remaining = total_seconds - elapsed
+            mins = remaining // 60
+            secs = remaining % 60
+            document.getElementById("timeRemaining").textContent = f"Time until next refresh: {mins}:{secs:02d}"
+            
+            await asyncio.sleep(1)
+            elapsed += 1
+
+def stop_bot():
+    document.getElementById("startBtn").classList.remove("hidden")
+    document.getElementById("stopBtn").classList.add("hidden")
+    update_status("Bot stopped", "fa-stop-circle", "red")
+    document.getElementById("progressFill").style.width = "0%"
+    document.getElementById("timeRemaining").textContent = "Time until next refresh: 0:00"
+
+document.getElementById("startBtn").addEventListener("click", lambda e: asyncio.ensure_future(run_bot()))
+document.getElementById("stopBtn").addEventListener("click", lambda e: stop_bot())
+    </py-script>
+</body>
+</html>
